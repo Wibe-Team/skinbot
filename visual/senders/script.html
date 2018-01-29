@@ -1,0 +1,62 @@
+
+<script src="/js/jquery-1.12.4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+
+$( document ).ready(function() {
+  $('#botnum').val( botid )
+  $('#userid').val( getCookie('userid') )
+
+  render_sender_list()
+});
+
+
+
+  function render_sender_list() {
+    var str = ''
+    for (var i in all_senders) {
+       str += '<div class="templ_list_elem" data-mess="'+all_senders[i].mess+'" data-name="'+all_senders[i].name+'" onclick="show_edit_sender_modal_box(this)" >' + all_senders[i].name + '</div>'
+    }
+    $('.cont').html(str);
+  }
+
+  function show_add_sender_modal_box() {
+    $('#action_type').val('addsender');
+
+    $('#name_modal').html('Добавить рассылку');
+    $("#add_sender_modal_box").modal("toggle");
+  }
+
+  function show_edit_sender_modal_box(e) {
+    console.log( $(e).attr('data-mess' ) );
+
+    $('#action_type').val('editsender');
+    $('#name_modal').html('Изменить рассылку')
+
+    $('#mess').val( $(e).attr('data-mess') );
+
+    $('#name').val( $(e).attr('data-name') );
+
+    $("#add_sender_modal_box").modal("toggle");
+  }
+
+  function addClick() {
+    if ($('#command').val() != '')
+      $('#command_add_form').submit();
+    else alert('')
+  }
+
+  function back() {
+    location.href = "/bots";
+  }
+
+  function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+</script>

@@ -1,0 +1,173 @@
+
+<script src="../../js/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+
+  $('#Userlogin').html(getCookie('email'))
+
+
+    function user_info_click() {
+      $("#user_info").modal("toggle");
+    }
+
+  function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+
+  function active(element){
+    adding_bot_row_color = element.id.slice(-1);
+    var elements = document.getElementsByClassName('colot_choise_block');
+    for (var i = elements.length - 1; i >= 0; i--) {
+      elements[i].classList.remove("act");
+    }
+    element.classList.add("act");
+    $('#row_color').val(adding_bot_row_color)
+  }
+
+//////////////////////////////////////////////
+
+  function addClick(element){
+    $('#action_type').val('addbot');
+    $('#name_modal').html('Telegram token');
+    $('#userid').val( parseInt(getCookie('userid'))  )
+    //$('#tel_token').val('434276912:AAH--1HodhxUgZiHoJGCJRmlp3_o2_A3c_g');
+    $('#tel_token').css('display','inline-block');
+    $('.edit_row').hide();
+    $('.add_row').show();
+  }
+  // function editClick(element){
+  //   current_bot_info.bot_num = parseInt(element.getAttribute('data-num'))
+  //   current_bot_info.tel_token = element.getAttribute('data-tel_token')
+  //   let num_bot=element.parentNode.parentNode.getAttribute('num_bot');
+  //   $('#name_modal').html('Bot ID : <b style="font-weight: bold;">'+num_bot+'</b>');
+  //   $('#tel_token').css('display','none');
+  //   $('#num_bot_input').val(num_bot);
+  //   $('.add_row').hide();
+  //   $('.edit_row').show();
+  // }
+
+//////////////////////////////////////////////
+
+  function deleteBotClick(e){
+
+    var num_bot=$('#name_modal>b').html();
+    if($(e).attr('data-num')!=undefined&&confirm('Удалить?')){
+      $.ajax({
+        type:"POST",
+        data: {
+          action:'delbot',
+          num_bot: $(e).attr('data-num')
+        },
+        url: "../actions",
+        success: function(data){
+          location.reload();
+        }
+      });
+    }
+  }
+
+  function logout() {
+    location.href = "../../signout";
+  }
+  function showComands(element) {
+    location.href = "../../mycommands/" + parseInt( element.getAttribute('data-num') );
+  }
+
+</script>
+
+
+<!-- !!!!!!!!!!!!!!!!!!!!! -->
+<style>
+  .bot_del_list_memory_modal {
+    width: 100%;
+    border: 4px double black;
+    border-collapse: collapse;
+   }
+   .bot_del_list_memory_modal th {
+    padding: 5px;
+    text-align: left;
+    background: #eee;
+    border: 1px solid black;
+   }
+   .bot_del_list_memory_modal td {
+    padding: 5px;
+    border: 1px solid black;
+   }
+</style>
+<script>
+
+  $('#bot_datatable').DataTable({
+
+    "lengthMenu": [[100, 50, 10, -1], [100, 50, 10, "All"]],
+
+    "oLanguage": {
+      "sSearch": "Поиск _INPUT_ ",
+      "oPaginate": {
+        "sNext": "Следующая",
+        "sPrevious": "Предыдущая"
+      },
+      "sInfo": "Страница _PAGE_ из _PAGES_",
+      "sLengthMenu": "Отображать _MENU_ ботов на стрнице",
+      "zeroRecords": "Нет, ничего",
+    },
+  });
+  function clearMemory(){
+    if(confirm('Удалить?'))
+    $.ajax({
+      type:"POST",
+      data: {
+        action:'clearDelBot',
+        user: getCookie('userid'),
+      },
+      url: "../actions",
+      success: function(data){
+        location.reload();
+      }
+    });
+  }
+
+  function tokenCheck() {
+    if($('#tel_token').val().length==45){
+      let res;
+      $.ajax({
+        type:"POST",
+        data: {
+          action:'tokenCheck',
+          token: $('#tel_token').val()
+        },
+        url: "../../actions",
+        success: function(data){
+         if(data) $('#b_token_save').removeAttr("disabled");
+          else alert('Token уже исполльзуется')
+        }
+      });
+    }
+    else {
+      $('#b_token_save').attr('disabled', '');
+
+    }
+  }
+</script>
+
+<!-- !!!!!!!!!!!!!!!!!!!!! -->
+<style>
+  .ui-state-default{
+    box-shadow: inset 0 1px #eee;
+  }
+  .ui-state-default:active{
+    cursor: move;
+  }
+</style>
+<script>
+  $(function(){
+    $("#bot_list_sortable").sortable();
+    $("#bot_list_sortable").disableSelection();
+  });
+</script>

@@ -1,0 +1,68 @@
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+<div id="add_bot_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="name_modal">Telegram token</p>
+        <form action="../actions" method="post" id="bot_add_form">
+          <input type="hidden" name="action" id="action_type" value="addbot">
+          <input type="hidden" name="row_color" id="row_color" value=0 >
+          <input type="hidden" name="userid" id="userid" value=0 >
+          <input type="hidden" name="rownumber" id="rownumber" value=0 >
+          <input type="hidden" name="num_bot_input" id="num_bot_input" value=0 >
+          <input type="text"   name="tel_token" id="tel_token" class="form-control add_row"/>
+          <label class="edit_row"> Ответ на произвольную команду
+            <input type="text"   name="comon_resp" id="comon_resp" class="form-control"/>
+          </label>
+        </form>
+        <button type="button" id="b_add_comand" class="btn btn-primary edit_row" onclick="showComands()"> Меню команд </button>
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <button type="button" id="b_token_save" class="btn btn-success" onclick="saveClick()" disabled>Сохранить</button>
+        </div>
+        <div class="col-3">
+          <button type="button" id="b_token_check" class="btn btn-primary add_row" onclick="tokenCheck()" >Проверить</button>
+        </div>
+        <div class="col-3">
+          №
+          <input type="text" id="row_number_input" name="row_number_input" class="form-control" style="width:50px; display: inline-block;">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="memory_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="name_modal">Удаленные боты</p>
+        <div class="row_mem_bot">
+
+        </div>
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3"></div>
+        <div class="col-3"></div>
+        <div class="col-3"></div>
+        <div class="col-3">
+          <button type="button" class="btn btn-danger" onclick="clearMemory()">Очистить память</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

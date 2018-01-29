@@ -1,0 +1,66 @@
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+<div id="add_bot_modal_box" class="modal fade" role="dialog">
+  <div class="debug flex">
+    <div class="left-side"></div>
+    <div class="right-side"></div>
+  </div>
+  <div class="global-form-page wrapper flex">
+    <div class="block form-wrapper">
+      <div class="logo blue" style="font-size: 4.2rem;">skinbot</div>
+      <form method="post" action="/actions" >
+        <center> <h3>Форма регистрации</h3> <center>
+        <input type="hidden" name="action" value="supersignup">
+        <div class="fields">
+          <div class="input flex"><input type="text" placeholder="Ваш login" data-name="login" name="login"></div>
+          <div class="input flex"><input type="text" placeholder="Ваш email адрес" data-name="email" name="email"></div>
+          <div class="input flex"><input type="password" placeholder="Ваш пароль" data-name="password" name="pass"></div>
+        </div>
+        <span class="Tappable-inactive button-component" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); user-select: none; cursor: pointer;">
+          <br />
+          <button type="submit">Зарегистрироваться</button>
+        </span>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div id="user_info" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="name_modal">Информация</p>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body" style="position:relative">
+
+        <form action="../actions" method="post" id="command_add_form">
+          <input type="hidden" name="action" id="action_type" value="userinfo">
+          <input type="hidden" name="userid" id="userid" value=0 >
+          <label class="edit_row"> Выбраный план</label><br>
+          <select class="selectpicker" id="user_plan" name="user_plan" style="width:50%">
+            <option value=1>Free</option>
+            <option value=0>low</option>
+            <option value=0>medium</option>
+            <option value=0>hight</option>
+          </select>
+        </form>
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <!--<button type="button" id="b_command_save" class="btn btn-success" onclick="addClick()">Добавить</button>-->
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" onclick="deleteBotClick()" data-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

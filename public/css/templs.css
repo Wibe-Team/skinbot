@@ -1,0 +1,27 @@
+.cont{
+  display: flex;
+  flex-direction: column;
+  overflow: inherit;
+}
+
+.templ_list_elem{
+  font-size: 17px;
+
+  cursor: pointer;
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #cccccc;
+  background-color: #fff;
+}
+
+.templ_list_elem a{
+  display: block;
+}
+.templ_list_elem a:hover{
+  text-decoration: none;
+}
+.templ_list_elem:hover{
+  -webkit-box-shadow: 3px 2px 3px -1px rgba(0,0,0,0.46);
+  -moz-box-shadow: 3px 2px 3px -1px rgba(0,0,0,0.46);
+  box-shadow: 3px 2px 3px -1px rgba(0,0,0,0.46);
+}

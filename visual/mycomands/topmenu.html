@@ -1,0 +1,25 @@
+<div class="row ryt">
+  <button class="btn btn-secondary" onClick="back()" >Назад</button>
+  <div class="popup_with_colors" id="popup_with_colors">
+    <div class="row">
+      <div class="col-4">
+        <div id="color_block1" class="colot_choise_block" onclick="active(this)"></div>
+      </div>
+      <div class="col-4">
+        <div id="color_block2" class="colot_choise_block" onclick="active(this)"></div>
+      </div>
+      <div class="col-4">
+        <div id="color_block3" class="colot_choise_block" onclick="active(this)"></div>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="btn btn-primary" onclick="all_comand_select()" > <img height="20px" src="/img/cheked.png" /> </button>
+  <button type="button" class="btn btn-primary" onclick="add_cheked_to_tampl()" > Добавить отмеченные в шаблоны </button>
+  <button type="button" class="btn btn-primary" id="color_popup_button" onclick="toggleColors()">Цвет строки</button>
+  <button type="button" class="btn btn-primary" onclick="show_import_templ_modal_box()" > Импортировать шаблон </button>
+  <button type="button" class="btn btn-primary" onclick="show_add_command_modal_box()" > Добавить команду </button>
+</div>
+
+</div>
+<div class="main">

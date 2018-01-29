@@ -1,0 +1,32 @@
+function solution(T) {
+
+  while ( T.indexOf(" ") > -1 )
+  {
+    T = T.replace("(","[")
+    T = T.replace(")","]")
+    T = T.replace(" ","")
+    T = T.replace(",None","")
+  } 
+
+  T = JSON.parse(T);
+  var D=[];
+  function gy(T) {
+    for (var i = 0; i < T.length; i++) {
+      if ( typeof T[i]  == 'array' ){
+        // gy(T[i])
+      }else{
+        D[i]=T[i];
+      }
+    }
+  }
+
+  function arraySum(array){
+    var sum = 0;
+    for(var i = 0; i < array.length; i++){
+    sum += array[i];
+    return sum;
+  }
+      return arraySum(D);
+}
+
+console.log( solution( '(5, (3, (20, (6, None, None), None), None), (10, (1, None, None), (15, (30, None, (9, None, None)), (8, None, None))))' ) );

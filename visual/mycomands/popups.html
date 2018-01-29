@@ -1,0 +1,205 @@
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+<div id="add_command_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="name_modal">Добавить команду</p>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body" style="position:relative">
+
+        <form action="../actions" method="post" id="command_add_form">
+          <input type="hidden" name="action" id="action_type" value="addcommand">
+          <input type="hidden" name="botnum" id="botnum" value=0 >
+          <input type="hidden" name="bottoken" id="bottoken" value=0 >
+          <input type="hidden" name="cnum" id="cnum" value=0 >
+          <input type="hidden" name="userid" id="userid" value=0 >
+          <input type="hidden" name="img_a" id="img_a" value=0 >
+          <input type="hidden" name="img" id="img" value=0 >
+          <input type="hidden" name="num_bot_input" id="num_bot_input" value=0 >
+          <label class="edit_row"> Родительская команда</label><br>
+          <select class="selectpicker" id="command_parents" name="command_parents" style="width:50%">
+            <option value=0>no parent</option>
+          </select>
+          <br /><br />
+          <label class="edit_row"> Название команды </label>
+          <input type="text"  name="command_name" id="command_name" class="form-control" />
+
+          <label class="edit_row"> Команда</label>
+          <input type="text"  name="command" id="command" class="form-control"/>
+          <br />
+
+          <label class="edit_row"> Ответ на команду</label>
+          <div class="row">
+            <div class="col-12 emoji" style="position:relative">
+              <div class="emoji_pop">
+
+              </div>
+              <span id="em_group_link1" class="btn em_group_link">😁</span>
+              <span id="em_group_link2" class="btn em_group_link">✂</span>
+              <span id="em_group_link3" class="btn em_group_link">🚀</span>
+              <span id="em_group_link4" class="btn em_group_link">Ⓜ</span>
+              <span id="em_group_link5" class="btn em_group_link">©</span>
+              <span id="em_group_link6" class="btn em_group_link">🚁</span>
+              <span id="em_group_link7" class="btn em_group_link">🌍</span>
+            </div>
+          </div>
+          <textarea name="command_resp" id="command_resp" class="form-control" rows="8" cols="80"></textarea>
+
+          <div class="row">
+            <div class="col-6">
+              <label class="edit_row"> Кнопки</label>
+              <textarea name="buttons_ta" id="buttons_ta" class="form-control" rows="8" cols="80"></textarea>
+              <br />
+              <button type="button" class="btn btn-primary" onclick="editor_show()"> Визуальный редактор </button>
+            </div>
+            <div class="col-6">
+              <label class="edit_row"> Кнопки инлайн</label>
+              <textarea name="buttons_tai" id="buttons_tai" class="form-control" rows="8" cols="80"></textarea>
+              <br />
+              <button type="button" class="btn btn-primary" onclick="inline_editor_show()" >Визуальный редактор</button>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-3">
+
+            </div>
+            <div class="col-6">
+              <div class="row upload_block" id="upload_block">
+                <input type="file" accept='image/*' class="form-control-file" id="uploadimage" style="margin:20px auto">
+                <button type="button" name="button" class="btn btn-primary" onclick="upload()"> upload</button>
+              </div>
+
+            </div>
+
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <button type="button" id="b_command_save" class="btn btn-success" onclick="addClick()">Добавить</button>
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" onclick="deleteBotClick()" data-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<div id="editor_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="name_modal">Добавить команду</p>
+        <button type="button" class="close"onclick="editor_close()" >&times;</button>
+      </div>
+      <div class="modal-body" style="position:relative">
+
+        <form action="../actions" method="post" id="buttons_add_form">
+
+          <button type="button" id="b_add_row" class="btn btn-primary" onclick="addRow()">Добавить строку</button>
+
+
+
+        </form>
+
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <button type="button" id="b_editor_save" class="btn btn-success" onclick="editor_save()">Сохранить</button>
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" onclick="editor_close()" >Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<div id="inline_editor_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="name_modal">Добавить команду</p>
+        <button type="button" class="close"onclick="inline_editor_close()" >&times;</button>
+      </div>
+      <div class="modal-body" style="position:relative">
+
+        <form action="../actions" method="post" id="inline_buttons_add_form">
+          <!--<input type="hidden" name="action" id="action_type" value="bottonseditor"> -->
+
+          <button type="button" id="b_add_row" class="btn btn-primary" onclick="inline_addRow()">Добавить строку</button>
+
+
+        </form>
+
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <button type="button" id="b_ieditor_save" class="btn btn-success" onclick="inline_editor_save()">Сохранить</button>
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" onclick="inline_editor_close()" >Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="import_templ_modal_box" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="name_modal">Доступные шабоны</p>
+        <button type="button" class="close" onclick="inline_editor_close()" >&times;</button>
+      </div>
+      <div class="modal-body" style="position:relative">
+
+
+
+
+        <div id="templs_accordion" role="tablist" aria-multiselectable="true"></div>
+
+
+
+
+      </div>
+      <div class="modal-footer" style="position:relative;text-align:center">
+        <div class="col-3">
+          <button type="button" id="b_ieditor_save" class="btn btn-success" onclick="post_include_templs()">Добавить</button>
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+        </div>
+        <div class="col-3">
+          <button type="button" class="btn btn-secondary" onclick="inline_editor_close()" >Закрыть</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

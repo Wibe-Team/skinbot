@@ -1,0 +1,183 @@
+.menu_bot h3 { padding-left: 20px; }
+.cont {
+ margin-top: 50px;
+ border-style: solid;
+ border-width: 2px;
+ border-color: #dddddd;
+ border-radius: 7px;
+ overflow: hidden;
+ border-bottom-style: none;
+ position: relative;
+}
+.cont .row
+{
+   margin-left: 0px;
+   margin-right: 0px;
+   padding-left: 50px;
+   border-bottom-style: solid;
+   border-bottom-width: 2px;
+   border-bottom-color:  #dddddd;
+   cursor: pointer;
+   -webkit-user-select: none;
+   position: relative;
+}
+.cont p
+{
+   font-size: 20px;
+   line-height: 40px
+}
+.even {
+  background-color: #f5f5f5;
+  display: none;
+}
+.next
+{
+ position: absolute;
+ width: 35px;
+ top: 5px;
+ left: 10px;
+ cursor: pointer;
+}
+.rot1
+{
+ transform: rotate(0deg);
+ transition: all 0.3s;
+}
+.rot
+{
+ transform: rotate(90deg);
+ transition: all 0.3s;
+}
+.edit_command, .remove_command{
+  line-height: 40px;
+  height: 40px;
+  position: absolute;
+  right: 20px;
+}
+
+.remove_command{
+  right: 110px;
+}
+.even .edit_command{
+  top: 0px;
+}
+button{
+  margin-left: 10px;
+}
+.popup_with_colors{
+  display: none;
+  position: absolute;
+  margin: -28px 0 0 326px;
+  width: 100px;
+  padding: 5px;
+  background-color: #fff;
+  border: 1px solid #000
+}
+.colot_choise_block{
+  height: 20px;
+}
+#color_block1, #color_block2, #color_block3
+{
+	width: 10px;
+	height: 10px;
+	cursor: pointer;
+}
+#color_block1
+{
+	background-color: red;
+}
+#color_block2
+{
+	background-color: yellow;
+}
+#color_block3
+{
+	background-color: green;
+}
+.act
+{
+	outline-style: solid;
+	outline-width: 1px;
+	outline-color: black;
+	outline-offset:2px;
+}
+.pointer_block{
+  width: 100%;
+
+}
+.pointer_block b{
+  font-weight: 900;
+}
+.ryt{
+  font-size: 20px;
+}
+.btn{
+  cursor: pointer;
+}
+.emoji_pop{
+  display: none;
+  overflow-y: auto;
+  position: absolute;
+  width: 300px; height: 100px;
+  top: 25px;
+  left: calc( 50% - 150px );
+  background: #fff;
+  border: 1px solid #000;
+}
+.emoji_pop{
+  cursor: pointer;
+  text-align: left;
+}
+.upload_block{
+  text-align: center;
+  line-height: 100px;
+}
+.upload_block img{
+  height: 100px;
+  border: 2px solid #000;
+  margin-right: 15px;
+}
+
+.editor_block, .inline_editor_block{
+  padding: 20px
+}
+.editor_block a, .inline_editor_block a{
+  margin-left: 10px;
+}
+.drop_buttons_row, .drop_inline_buttons_row{
+  position: absolute;
+  right: 25px;
+}
+.drop_buttons_row a, .drop_inline_buttons_row a{
+  line-height: 60px;
+}
+
+.checkbox_box{
+  position: absolute;
+  top: 0; left: 20px;
+  height: 40px;
+  padding-top: 15px;
+}
+
+.checkbox_box input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+}
+@media (min-width: 576px) {
+  .modal-dialog {
+      max-width: 750px;
+      margin: 30px auto;
+  }
+  #editor_modal_box .modal-dialog, #inline_editor_modal_box .modal-dialog {
+    max-width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+  #editor_modal_box .modal-content, #inline_editor_modal_box .modal-content{
+    height: 100%;
+  }
+}

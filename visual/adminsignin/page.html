@@ -1,0 +1,49 @@
+<html lang="en" class=" "><head>
+			  <meta charset="UTF-8">
+		    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+			  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+			  <title>SkinBot</title>
+				<link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600|Pacifico" rel="stylesheet">
+				<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="/css/main.css">
+				<script type="text/javascript">
+					function toReg() {
+						location.href = "../../signup";
+					}
+					if (document.cookie.indexOf('login error') >= 0 )  alert('login error')
+				</script>
+	</head>
+			<body>
+				<div class="preloader hide">
+					<div>skinbot</div>
+				</div>
+			  <div id="root">
+					<div data-reactroot="" id="app">
+						<div class="debug flex">
+							<div class="left-side"></div>
+							<div class="right-side"></div>
+						</div>
+						<div class="global-form-page wrapper flex">
+							<div class="block form-wrapper">
+								<div class="logo blue" style="font-size: 4.2rem;">skinbot</div>
+								<form method="post" action="/actions" >
+									<center> <h3> Форма входа администратора </h3> <center>
+                  <input type="hidden" name="action" value="adminsignin">
+									<div class="fields">
+										<div class="input flex"><input type="text" placeholder="Ваш email адрес" data-name="email" name="login"></div>
+										<div class="input flex"><input type="password" placeholder="Ваш пароль" data-name="password" name="pass"></div>
+									</div>
+<br />
+									<span class="Tappable-inactive button-component" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); user-select: none; cursor: pointer;">
+										<button type="submit">Авторизоваться</button> <br /><br />
+									</span>
+
+								</form>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+	</body></html>

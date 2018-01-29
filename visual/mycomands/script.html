@@ -1,0 +1,786 @@
+
+<script src="/js/jquery-1.12.4.js"></script>
+<script src="/js/jquery.contextMenu.js"></script>
+<script src="/js/jquery.ui.position.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+
+
+<script type="text/javascript">
+  $.contextMenu({
+      // define which elements trigger this menu
+      selector: ".pointer_block",
+      // define the elements of the menu
+      items: {
+          del: {name: "Удалить", callback: function(key, opt){ context_remove_command($(this)[0].dataset.num); }},
+          deltree: {name: "Удалить ветку", callback: function(key, opt){ context_remove_command($(this)[0].dataset.num); }}
+      }
+      // there's more, have a look at the demos and docs...
+  });
+  let botid = parseInt( window.location.href.toString().substr( window.location.href.toString().indexOf(window.location.host.toString() ) + window.location.host.toString().length + 12 ));
+  let userid = getCookie('userid');
+  let choised_templ, choised_templ_comm;
+  $('#botnum').val(parseInt( window.location.href.toString().substr( window.location.href.toString().indexOf(window.location.host.toString() ) + window.location.host.toString().length + 12 )));
+  $('#templs_accordion').html( render_templs_list() );
+  load_com_list();
+
+
+  $('#Userlogin').html(getCookie('email'));
+  function getCookie(name) {
+    let matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+
+  $(".pointer_block").click(function(event) {
+    if ( $(this).find(".next").attr('class').indexOf('rot1') > 0)
+    {
+      $(this).find(".next").removeClass('rot1').addClass('rot');
+      $(this).parent(".row").parent(".parent").find(".even").slideToggle()
+    }
+    else
+    {
+      $(this).find(".next").removeClass('rot').addClass('rot1');
+      $(this).parent(".row").parent(".parent").find(".even").slideToggle()
+    }
+  });
+
+  function render_templs_list() {
+    let str='';
+    for (let i = 0; i < templs.length; i++) {
+      str += gen_templ( parseInt(templs[i].templ_num) - 1) + '\n';
+    }
+    return str
+  }
+
+  function render_templs_comm_list(tn) {
+    let str='';
+    for (let i = 0; i < templs[tn].commands.length; i++) {
+      str += gen_templ_comm( templs[tn].commands[i].cn, templs[tn].commands[i].c , templs[tn].commands[i].cn, i) + '\n';
+    }
+    return str
+  }
+
+  function load_com_list(){
+    let yy = '';
+
+    for (let i = 0; i < all_commands.length; i++) {
+      all_commands[i].child = 'none';
+      if ( parseInt(all_commands[i].cp) > 0 ){
+        let oi = parseInt(all_commands[i].cp);
+        all_commands[oi].child = { 'c':all_commands[i].c, 'cr':all_commands[i].cr, 'cp': 0 };
+      }
+    }
+
+    for (let i = 0; i < all_commands.length; i++)
+
+      if ( all_commands[i].cp === 0 ){ // не берем детей, они уже внутри в child свойстве
+
+      $('#command_parents').append($('<option>', {
+        value: i,
+        text: all_commands[i].c
+      }));
+
+      if (all_commands[i].child === 'none')
+        yy += '<div> '+ com_block(all_commands[i].cn, all_commands[i].c, i) + '</div> \n';
+      else
+        yy += '<div class="parent"> '+ multi_com_block(all_commands[i].cn, all_commands[i].c, i) + child_com_block(all_commands[i].child.cn, all_commands[i].child.c, i) +'</div> \n'
+
+    }
+    $('.cont').html( yy )
+  }
+
+  function com_block(cn, c, n) {
+    return '<div class="row"> <div class="checkbox_box" ><input id="'+ n +'" type="checkbox" /> </div> <div class="pointer_block" data-num="'+ n +'" >  <p>  '+ c +' - <b>'+ cn +'</b></p></div>  <a onclick="remove_command(this)" class="remove_command" data-num="'+ n +'"  >Удалить </a> <a onclick="edit_command(this)" class="edit_command" data-num="'+ n +'"  >Изменить</a></div>'
+  }
+
+  function multi_com_block(cn, c, n) {
+    return '<div class="row"> <div class="pointer_block" data-num="'+ n +'" ><p><img class="next rot1" src="../../../img/next.png">'+ c +' - <b>'+ cn +'</b></p></div> <a onclick="remove_command(this)" class="remove_command" data-num="'+ n +'"  >Удалить </a>  <a onclick="edit_command(this)" class="edit_command" data-num="'+ n +'" >Изменить</a></div>'
+  }
+
+  function child_com_block(cn, c, n) {
+    return '<div class="row even"> <div class="pointer_block" data-num="'+ n +'" ><p><span class="sub_level">&nbsp;&nbsp;&nbsp;</span>'+ c +' - <b>'+ cn +'</b></p></div> <a onclick="remove_command(this)" class="remove_command" data-num="'+ n +'"  >Удалить </a>  <a onclick="edit_command(this)" class="edit_command" data-num="'+ n +'"  >Изменить</a></div>'
+  }
+
+  function gen_templ(tn) {
+    return  '  <div class="card">' +
+            '    <div class="card-header" role="tab" id="heading'+tn+'">' +
+            '      <h5 class="mb-0">'+
+            '        <a data-toggle="collapse" data-parent="#templs_accordion" href="#collapse'+tn+'" aria-expanded="true" aria-controls="collapse'+tn+'" data-num="'+ tn +'" onclick="collapse_click(this)">'+
+                      'Templ #' + (tn+1) +
+            '        </a>'+
+            '      </h5>'+
+            '    </div>'+
+
+            '    <div id="collapse'+tn+'" class="collapse" role="tabpanel" aria-labelledby="heading'+tn+'">'+
+            '      <div class="card-block">'+
+
+            render_templs_comm_list(tn) +
+
+            '      </div>'+
+            '    </div>'+
+            '  </div>';
+  }
+
+  function gen_templ_comm(cn, c, n) {
+    return  '        <label class="form-check-label">'+
+            '          <input type="checkbox" class="form-check-input" value="'+n+'" >'+
+            '          '+cn+ ' - '+ c+
+            '        </label> <br />';
+  }
+
+  function add_command_modal() {
+
+    $('#action_type').val('addcommand');
+    $('#command_name').val('');
+    $('#command').val('');
+    $('#command_resp').val('');
+    $('#buttons_ta').val('');
+    $('#b_command_save').html('Добавить');
+    $('#command_parents').find('option').attr("selected", "");
+    $('#command_parents').find(':nth-child(1) ').attr("selected", "selected");
+
+
+    $("#add_command_modal_box").modal("toggle");
+  }
+
+  function post_include_templs() {
+
+    let post_obj = get_selected_templs();
+    post_obj.action = 'includetempltobot';
+    post_obj.botid = botid;
+    post_obj.token = token;
+    post_obj.userid = userid;
+
+    if( post_obj.templ_num!=undefined ){
+      $.ajax({
+        type:"POST",
+        data: post_obj,
+        url: "/actions",
+        success: function(data){
+          location.reload();
+        }
+      });
+    }
+  }
+
+  function get_selected_templs() {
+    let de = $('#collapse'+choised_templ).find('input');
+    let n = de.length;
+    let arr = [];
+    for (let i = 0; i < n; i++) {
+      if ( de.eq(i).is(':checked') )
+        arr.push(i)
+    }
+
+    return {templ_num: (parseInt(choised_templ)+1), checked_comms: arr }
+  }
+
+  function remove_command(e) {
+    if($(e).attr('data-num')!=undefined&&confirm('Удалить?')){
+      $.ajax({
+        type:"POST",
+        data: {
+          action:'removecommand',
+          cnum: $(e).attr('data-num'),
+          botnum: botnum
+        },
+        url: "../actions",
+        success: function(data){
+          location.reload();
+        }
+      });
+    }
+  }
+
+  function context_remove_command(n) {
+    if(n!=undefined&&confirm('Удалить?')){
+      $.ajax({
+        type:"POST",
+        data: {
+          action:'removecommand',
+          cnum: n,
+          botnum: botnum
+        },
+        url: "../actions",
+        success: function(data){
+          location.reload();
+        }
+      });
+    }
+  }
+
+  function edit_command(e) {
+    let i = $(e).attr('data-num');
+
+    $('#action_type').val('editcommand');
+    $('#cnum').val(i);
+    $('#bottoken').val(token);
+    $('#command_name').val(all_commands[i].cn);
+    $('#command').val(all_commands[i].c);
+    $('#command_resp').val(all_commands[i].cr);
+    $('#buttons_ta').val(all_commands[i].cb);
+    $('#buttons_tai').val(all_commands[i].cbi);
+    $('#command_parents :nth-child('+i+2+') ').attr("selected", "selected");
+    $('#b_command_save').attr('onclick', 'editClick()');
+    $('#b_command_save').html('Сохранить');
+
+    $("#add_command_modal_box").modal("toggle");
+
+  }
+  function search_selected_commands() {
+    let aitch = $('.checkbox_box input[type=checkbox]');
+    let n = aitch.length;
+    let res = [];
+    for (let i = 0; i < aitch.length; i++) {
+      if( aitch.eq(i).is(':checked') === true ) res.push( i );
+    }
+    return res
+  }
+
+  function all_comand_select() {
+    $('.checkbox_box input[type=checkbox]').prop('checked', true);
+  }
+
+  function add_cheked_to_tampl() {
+    let arg = search_selected_commands();
+    $.ajax({
+      type: "POST",
+      data: {
+        action: 'addmytempl',
+        userid: userid,
+        bot_templ: botid,
+        sc_arr: arg,
+      },
+      url: "/actions",
+    });
+  }
+
+  //  BUTTONS *************
+
+  function show_import_templ_modal_box() {
+    $("#import_templ_modal_box").modal("toggle");
+  }
+
+  function collapse_click(el) {
+    choised_templ = $(el).attr('data-num');
+    console.log(choised_templ);
+  }
+
+
+  function show_add_command_modal_box() {
+    $("#add_command_modal_box").modal("toggle");
+  }
+
+  let row_buttons_count = 1;
+  let buttons_count = [ NaN, 1 ];
+  let buttons = [];
+
+  function editor_show() {
+
+
+
+    row_buttons_count = 0;
+    buttons_count = [ NaN ];
+    buttons = [];
+
+    // buttons[] generate
+    let a = $('#buttons_ta').val();
+    if (a != ""){
+      let buttons = JSON.parse( a );
+
+      row_buttons_count = buttons.length - 1;
+
+      let code = '<button type="button" id="b_add_row" class="btn btn-primary" onclick="addRow()">Добавить строку</button>';
+      for (let i = 1; i < buttons.length; i++) {
+        code += '          <div class="row" id="row'+i+'">\n            <div class="drop_buttons_row">\n                  <a onclick="dropRow(this)">Удалить строку</a>\n                </div>\n               ';
+        let n = buttons[i].length;
+        let w = 100 / (n+2);
+        buttons_count.push(n);
+
+        for (let j = 0; j < n; j++) {
+          code += ' <div class="editor_block row'+i+'_block" id="row'+i+'_block'+j+'" style="width:'+w+'%">\n                  <input type="text" name="button" id="button" data-row="'+i+'" data-block="'+j+'" class="form-control" style="width:85%;float: left; " value="'+buttons[i][j]+'"  /> <a  onclick="add_button_to_row('+i+', 1)">+</a> <a  onclick="drop_button_to_row(this, '+i+')">-</a>\n                </div>\n';
+        }
+
+        code += '             </div>';
+      }
+      $("#buttons_add_form").html(code)
+
+    }
+    else {
+      console.log('!');
+      //$("#buttons_add_form").html('          <button type="button" id="b_add_row" class="btn btn-primary" onclick="addRow()">Добавить строку</button>                            <div class="row" id="row1" style="position:relative">                  <div class="drop_buttons_row">                    <a onclick="dropRow(this)">Удалить строку</a>                  </div>                  <div class="editor_block row1_block" id="row1_block1" style="width:50%">                    <input type="text"name="button" id="button_input" data-row="1" data-block="1" class="form-control" style="width:85%;float: left; " value="" /> <a onclick="add_button_to_row(1, 1)">+</a> <a onclick="drop_button_to_row(this, 1)">-</a>                  </div>                      </div>')
+    }
+    $("#add_command_modal_box").modal("toggle");
+    $("#editor_modal_box").modal({
+     backdrop: false
+    })
+
+  }
+
+
+
+  function editor_save() {
+
+    row_buttons_count = 0;
+    buttons_count = [ NaN ];
+    buttons = [];
+
+    let n = $("#buttons_add_form  input").length;
+    let b = false;
+    let el, row = [], val;
+    for (let i = 0; i < n; i++) {
+      el = $("#buttons_add_form  input").eq(i);
+      row = $(el).attr('data-row');
+      val = $(el).val();
+          console.log(el, row, val);
+      if ( buttons[row] === undefined )
+        buttons[row] = [];
+
+      buttons[row].push(val);
+
+      if ( el.val() === '') {
+        b = true;
+        break;
+      }
+
+    }
+
+    console.log(buttons);
+    let s = '[ ["buttons_ta"],';
+    for (let i = 1; i < buttons.length; i++) {
+
+      s += '[ "' + buttons[i].join('", "') + '" ], '
+    }
+    s = s.slice(0, -2) + ' ]';
+
+    $('#buttons_ta').val( s );
+
+    if ( b )
+      alert('Не все команды заданы');
+    else {
+      $("#add_command_modal_box").modal("toggle");
+      $("#editor_modal_box").modal("toggle");
+    }
+
+  }
+
+  function editor_close() {
+        $("#editor_modal_box").modal("toggle");
+    $("#add_command_modal_box").modal("toggle");
+
+  }
+
+  function dropRow(elem) {
+    $(elem).parent('.drop_buttons_row').parent('.row').remove();
+    row_buttons_count--;
+  }
+
+  function addRow() {
+    row_buttons_count++;
+    buttons_count[row_buttons_count] = 1;
+    $("#buttons_add_form").append('          <div class="row" id="row'+row_buttons_count+'">\n            <div class="drop_buttons_row">\n                  <a onclick="dropRow(this)">Удалить строку</a>\n                </div>\n                <div class="editor_block row'+row_buttons_count+'_block" id="row'+row_buttons_count+'_block1" style="width:50%">\n                  <input type="text" name="button" id="button" data-row="'+row_buttons_count+'" data-block="1" class="form-control" style="width:85%;float: left; " value=""  /> <a  onclick="add_button_to_row('+row_buttons_count+', 1)">+</a> <a  onclick="drop_button_to_row(this, '+row_buttons_count+')">-</a>\n                </div>\n             </div>')
+  }
+
+  function add_button_to_row(row, before) {
+    buttons_count[row]++;
+
+    let n = buttons_count[row];
+    let w = 100 / (n+2);
+    let el = $("#row"+row);
+
+    el.find('.editor_block').css({ 'width' : w+'%' });
+
+    el.append('                <div class="editor_block row1_block" id="row'+row+'_block'+before+'" style="width:'+w+'%">\n                  <input type="text" name="button" id="button" data-row="'+row+'" data-block="'+n+'" class="form-control" style="width:85%;float: left; " value=""  /> <a  onclick="add_button_to_row('+row+')">+</a> <a  onclick="drop_button_to_row(this, '+row+')">-</a>\n                </div>\n')
+
+  }
+
+  function drop_button_to_row(elem, row) {
+    buttons_count[row]--;
+    //console.log(buttons_count[row]);
+
+    if (buttons_count[row] === 0) {
+      $(elem).parent('.editor_block').parent('.row').remove()
+    }
+    else {
+      let n = buttons_count[row];
+      let w = 100 / (n+2);
+      let el = $("#row"+row);
+
+      $(elem).parent('.editor_block').remove();
+      el.find('.editor_block').css({ 'width' : w+'%' })
+    }
+
+  }
+
+
+
+
+
+  function toggleColors() {
+    $('#popup_with_colors').toggle();
+  }
+
+  function active(element){
+    adding_bot_row_color = element.id.slice(-1);
+    let elements = document.getElementsByClassName('colot_choise_block');
+    for (let i = elements.length - 1; i >= 0; i--) {
+      elements[i].classList.remove("act");
+    }
+    element.classList.add("act");
+    $('#row_color').val(adding_bot_row_color);
+
+    $.ajax({
+
+      type: "POST",
+      data: {
+        action: 'setcolor',
+        botid: botid,
+        color: adding_bot_row_color,
+      },
+      url: "/actions",
+
+    });
+
+  }
+
+  function addClick() {
+    if ($('#command').val() != '')
+      $('#command_add_form').submit();
+    else alert('')
+  }
+
+  function editClick() {
+    if ($('#command').val() != '')
+      $('#command_add_form').submit();
+    else alert('')
+  }
+
+
+  function back() {
+    location.href = "../../bots";
+  }
+  function logout() {
+    location.href = "../../signout";
+  }
+
+  function upload() {
+    let $input = $("#uploadimage");
+    let fd = new FormData;
+
+    fd.append('img', $input.prop('files')[0]);
+
+    $.ajax({
+
+      type: "POST",
+      data: fd,
+      url: "/upload",
+      processData: false,
+      contentType: false,
+      success: function(data){
+        $('#upload_block').html( '<img src="'+data+'"/> Upload success!' );
+        $('#img_a').val(true);
+        $('#img').val(data.substr(data.lastIndexOf('/')+1))
+
+      },
+
+    });
+  }
+
+
+
+  // Inline ****************
+
+
+  let row_inline_buttons_count = 1;
+  let inline_buttons_count = [ NaN, 1 ];
+  let inline_buttons = [];
+
+  function inline_editor_show() {
+
+    inline_row_buttons_count = 0;
+    inline_buttons_count = [ NaN ];
+    inline_buttons = [];
+
+    // buttons[] generate
+    let a = $('#buttons_tai').val();
+    if (a != ""){
+      let inline_buttons = JSON.parse( a );
+
+      row_buttons_count = buttons.length - 1;
+
+      let code = '<button type="button" id="b_add_row" class="btn btn-primary" onclick="inline_addRow()">Добавить строку</button>';
+
+      for (let i = 1; i < inline_buttons.length; i++) {
+        code += `
+                <div class="row" id="row${i}">
+                    <div class="drop_buttons_row">
+                        <a onclick="inline_dropRow(this)">Удалить строку</a>
+                    </div>
+                `;
+        let n = inline_buttons[i].length;
+        let w = 100 / (n+2);
+        inline_buttons_count.push(n);
+
+        for (let j = 0; j < n; j++) {
+          code += `
+                <div class="editor_block row'+i+'_block" id="row${i}_block${j}" style="width:${w}%">
+                   <input type="text"  data-row="${i}" data-block="${j}" class="form-control input_inline_telegbutton_text" style="width:85%;float: left; " value="${inline_buttons[i][j].text}"  />
+                   <a  onclick="inline_add_button_to_row(${i}, 1)">+</a>
+                   <input type="text"  data-row="${i}" data-block="${j}" class="form-control input_inline_telegbutton_comm" style="width:85%;float: left; " value="${inline_buttons[i][j].comm}"  />
+                   <a  onclick="inline_drop_button_to_row(this, ${i})">-</a>
+                 </div>`;
+        }
+
+        code += '             </div>';
+      }
+      $("#inline_buttons_add_form").html(code)
+
+    }
+    else {
+      console.log('!');
+      $("#inline_buttons_add_form").html(`          <button type="button" id="b_add_row" class="btn btn-primary" onclick="inline_addRow()">Добавить строку</button>`)
+    }
+
+    $("#add_command_modal_box").modal("toggle");
+    $("#inline_editor_modal_box").modal({     backdrop: false    })
+
+  }
+
+  function inline_editor_save() {
+
+    inline_row_buttons_count = 0;
+    inline_buttons_count = [ NaN ];
+    inline_buttons = [];
+    let qt = $(".input_inline_telegbutton_text");
+    let qc = $(".input_inline_telegbutton_comm");
+
+    let n = qt.length;
+    let b = false;
+    let el,comm, row , val;
+
+    for (let i = 0; i < n; i++) {
+      el = $(qt).eq(i);
+      comm = $(qc).eq(i);
+      row = $(el).attr('data-row');
+      val = `"text": "${el.val()}", "comm": "${comm.val()}"`;
+          console.log(el, row, val);
+      if ( inline_buttons[row] === undefined )
+        inline_buttons[row] = [];
+
+      inline_buttons[row].push(val);
+
+      if ( el.val() === '' || comm.val() === '' ) {
+        b = true;
+          console.log('break___');
+        break;
+      }
+
+    }
+      console.log(inline_buttons);
+    let s = '[ ["buttons_tai"],';
+    for (let i = 1; i < inline_buttons.length; i++) {
+      s += `[ { ${inline_buttons[i].join('}, {')} } ], `
+    }
+    s = s.slice(0, -2) + ' ]';
+    console.log(s);
+    $('#buttons_tai').val( s );
+
+    if ( b )
+      alert('Не все команды заданы');
+    else {
+      $("#add_command_modal_box").modal("toggle");
+      $("#inline_editor_modal_box").modal("toggle");
+    }
+
+  }
+
+  function inline_editor_close() {
+        $("#inline_editor_modal_box").modal("toggle");
+    $("#add_command_modal_box").modal("toggle");
+
+  }
+
+  function inline_dropRow(elem) {
+    $(elem).parent('.drop_buttons_row').parent('.row').remove();
+    inline_row_buttons_count--;
+  }
+
+  function inline_addRow() {
+    inline_row_buttons_count++;
+    inline_buttons_count[inline_row_buttons_count] = 1;
+    $("#inline_buttons_add_form").append(`
+              <div class="row" id="row${inline_row_buttons_count}">
+                <div class="drop_buttons_row">
+                    <a onclick="inline_dropRow(this)">Удалить строку</a>
+                </div>
+                <div class="editor_block row${inline_row_buttons_count}_block" id="row${inline_row_buttons_count}_block1" style="width:50%">
+                  <input type="text" data-row="${inline_row_buttons_count}" data-block="1" class="form-control input_inline_telegbutton_text" style="width:85%;float: left;" value=""  />
+                  <a onclick="inline_add_button_to_row(${inline_row_buttons_count}, 1)">+</a>
+
+                  <input type="text" data-row="${inline_row_buttons_count}" data-block="1" class="form-control input_inline_telegbutton_comm" style="width:85%;float: left;" value=""/>
+                  <a onclick="inline_drop_button_to_row(this, ${inline_row_buttons_count})">-</a>
+                </div>
+              </div>
+    `)
+  }
+
+  function inline_add_button_to_row(row, before) {
+    inline_buttons_count[row]++;
+
+    let n = inline_buttons_count[row];
+    let w = 100 / (n+2);
+    let el = $("#row"+row);
+
+    el.find('.editor_block').css({ 'width' : w+'%' });
+
+    el.append(`
+                <div class="editor_block row1_block" id="row${row}_block${before}" style="width:${w}%">
+                   <input type="text" data-row="${row}" data-block="${n}" class="form-control input_inline_telegbutton_text" style="width:85%;float: left; " value="" />
+                   <a onclick="inline_add_button_to_row(${row})">+</a>
+                   <input type="text" data-row="${row}" data-block="${n}" class="form-control input_inline_telegbutton_comm" style="width:85%;float: left; " value="" />
+                   <a onclick="inline_drop_button_to_row(this, ${row} )">-</a>
+                </div>`
+    )
+
+  }
+
+  function inline_drop_button_to_row(elem, row) {
+    inline_buttons_count[row]--;
+    //console.log(buttons_count[row]);
+
+    if (inline_buttons_count[row] === 0) {
+      $(elem).parent('.editor_block').parent('.row').remove()
+    }
+    else {
+      let n = inline_buttons_count[row];
+      let w = 100 / (n+2);
+      let el = $("#row"+row);
+
+      $(elem).parent('.editor_block').remove();
+      el.find('.editor_block').css({ 'width' : w+'%' })
+    }
+
+  }
+
+
+
+  // Emoji *****************
+
+  function open_em_group(g) {
+    switch (g) {
+      case 1:
+        return '<span>😁</span><span>😂</span><span>😃</span><span>😄</span><span>😅</span><span>😆</span><span>😉</span><span>😊</span><span>😋</span><span>😌</span><span>😍</span><span>😏</span><span>😒</span><span>😓</span><span>😔</span><span>😖</span><span>😘</span><span>😚</span><span>😜</span><span>😝</span><span>😞</span><span>😠</span><span>😡</span><span>😢</span><span>😣</span><span>😤</span><span>😥</span><span>😨</span><span>😩</span><span>😪</span><span>😫</span><span>😭</span><span>😰</span><span>😱</span><span>😲</span><span>😳</span><span>😵</span><span>😷</span><span>😸</span><span>😹</span><span>😺</span><span>😻</span><span>😼</span><span>😽</span><span>😾</span><span>😿</span><span>🙀</span><span>🙅</span><span>🙆</span><span>🙇</span><span>🙈</span><span>🙉</span><span>🙊</span><span>🙋</span><span>🙌</span><span>🙍</span><span>🙎</span><span>🙏</span>';
+        break;
+      case 2:
+        return '<span>✂</span><span>✅</span><span>✈</span><span>✉</span><span>✊</span><span>✋</span><span>✌</span><span>✏</span><span>✒</span><span>✔</span><span>✖</span><span>✨</span><span>✳</span><span>✴</span><span>❄</span><span>❇</span><span>❌</span><span>❎</span><span>❓</span><span>❔</span><span>❕</span><span>❗</span <span>❤</span><span>➕</span><span>➖</span><span>➗</span><span>➡</span><span>➰</span>';
+        break;
+      case 3:
+        return'<span>🚀</span><span>🚃</span><span>🚄</span><span>🚅</span><span>🚇</span><span>🚉</span><span>🚌</span><span>🚏</span><span>🚑</span><span>🚒</span><span>🚓</span><span>🚕</span><span>🚗</span><span>🚙</span><span>🚚</span><span>🚢</span><span>🚤</span><span>🚥</span><span>🚧</span><span>🚨</span><span>🚩</span><span>🚪</span><span>🚫</span><span>🚬</span><span>🚭</span><span>🚲</span><span>🚶</span><span>🚹</span><span>🚺</span><span>🚻</span><span>🚼</span><span>🚽</span><span>🚾</span><span>🛀</span>';
+        break;
+      case 4:
+        return'<span>Ⓜ</span><span>🅰</span><span>🅱</span><span>🅾</span><span>🅿</span><span>🆎</span><span>🆑</span><span>🆒</span><span>🆓</span><span>🆔</span><span>🆕</span><span>🆖</span><span>🆗</span><span>🆘</span><span>🆙</span><span>🆚</span><span>🇩🇪</span><span>🇬🇧</span><span>🇨🇳</span><span>🇯🇵</span><span>🇰🇷</span><span>🇫🇷</span><span>🇪🇸</span><span>🇮🇹</span><span>🇺🇸</span><span>🇷🇺</span><span>🈁</span><span>🈂</span><span>🈚</span><span>🈯</span><span>🈲</span><span>🈳</span><span>🈴</span><span>🈵</span><span>🈶</span><span>🈷</span><span>🈸</span><span>🈹</span><span>🈺</span><span>🉐</span><span>🉑</span>';
+        break;
+      case 5:
+        return '<span>©</span><span>®</span><span>‼</span><span>⁉</span><span>8⃣</span><span>9⃣</span><span>7⃣</span><span>6⃣</span><span>1⃣</span><span>0⃣</span><span>2⃣</span><span>3⃣</span><span>5⃣</span><span>4⃣</span><span>#⃣</span><span>™</span><span>ℹ</span><span>↔</span><span>↕</span><span>↖</span><span>↗</span><span>↘</span><span>↙</span><span>↩</span><span>↪</span><span>⌚</span><span>⌛</span><span>⏩</span><span>⏪</span><span>⏫</span><span>⏬</span><span>⏰</span><span>⏳</span><span>▪</span><span>▫</span><span>▶</span><span>◀</span><span>◻</span><span>◼</span><span>◽</span><span>◾</span><span>☀</span><span>☁</span><span>☎</span><span>☑</span><span>☔</span><span>☕</span><span>☝</span><span>☺</span><span>♈</span><span>♉</span><span>♊</span><span>♋</span><span>♌</span><span>♍</span><span>♎</span><span>♏</span><span>♐</span><span>♑</span><span>♒</span><span>♓</span><span>♠</span><span>♣</span><span>♥</span><span>♦</span><span>♨</span><span>♻</span><span>♿</span><span>⚓</span><span>⚠</span><span>⚡</span><span>⚪</span><span>⚫</span><span>⚽</span><span>⚾</span><span>⛄</span><span>⛅</span><span>⛎</span><span>⛔</span><span>⛪</span><span>⛲</span><span>⛳</span><span>⛵</span><span>⛺</span><span>⛽</span><span>⤴</span><span>⤵</span><span>⬅</span><span>⬆</span><span>⬇</span><span>⬛</span><span>⬜</span><span>⭐</span><span>⭕</span><span>〰</span><span>〽</span><span>㊗</span><span>㊙</span><span>🀄</span><span>🃏</span><span>🌀</span><span>🌁</span><span>🌂</span><span>🌃</span><span>🌄</span><span>🌅</span><span>🌆</span><span>🌇</span><span>🌈</span><span>🌉</span><span>🌊</span><span>🌋</span><span>🌌</span><span>🌏</span><span>🌑</span><span>🌓</span><span>🌔</span><span>🌕</span><span>🌙</span><span>🌛</span><span>🌟</span><span>🌠</span><span>🌰</span><span>🌱</span><span>🌴</span><span>🌵</span><span>🌷</span><span>🌸</span><span>🌹</span><span>🌺</span><span>🌻</span><span>🌼</span><span>🌽</span><span>🌾</span><span>🌿</span><span>🍀</span><span>🍁</span><span>🍂</span><span>🍃</span><span>🍄</span><span>🍅</span><span>🍆</span><span>🍇</span><span>🍈</span><span>🍉</span><span>🍊</span><span>🍌</span><span>🍍</span><span>🍎</span><span>🍏</span><span>🍑</span><span>🍒</span><span>🍓</span><span>🍔</span><span>🍕</span><span>🍖</span><span>🍗</span><span>🍘</span><span>🍙</span><span>🍚</span><span>🍛</span><span>🍜</span><span>🍝</span><span>🍞</span><span>🍟</span><span>🍠</span><span>🍡</span><span>🍢</span><span>🍣</span><span>🍤</span><span>🍥</span><span>🍦</span><span>🍧</span><span>🍨</span><span>🍩</span><span>🍪</span><span>🍫</span><span>🍬</span><span>🍭</span><span>🍮</span><span>🍯</span><span>🍰</span><span>🍱</span><span>🍲</span><span>🍳</span><span>🍴</span><span>🍵</span><span>🍶</span><span>🍷</span><span>🍸</span><span>🍹</span><span>🍺</span><span>🍻</span><span>🎀</span><span>🎁</span><span>🎂</span><span>🎃</span><span>🎄</span><span>🎅</span><span>🎆</span><span>🎇</span><span>🎈</span><span>🎉</span><span>🎊</span><span>🎋</span><span>🎌</span><span>🎍</span><span>🎎</span><span>🎏</span><span>🎐</span><span>🎑</span><span>🎒</span><span>🎓</span><span>🎠</span><span>🎡</span><span>🎢</span><span>🎣</span><span>🎤</span><span>🎥</span><span>🎦</span><span>🎧</span><span>🎨</span><span>🎩</span><span>🎪</span><span>🎫</span><span>🎬</span><span>🎭</span><span>🎮</span><span>🎯</span><span>🎰</span><span>🎱</span><span>🎲</span><span>🎳</span><span>🎴</span><span>🎵</span><span>🎶</span><span>🎷</span><span>🎸</span><span>🎹</span><span>🎺</span><span>🎻</span><span>🎼</span><span>🎽</span><span>🎾</span><span>🎿</span><span>🏀</span><span>🏁</span><span>🏂</span><span>🏃</span><span>🏄</span><span>🏆</span><span>🏈</span><span>🏊</span><span>🏠</span><span>🏡</span><span>🏢</span><span>🏣</span><span>🏥</span><span>🏦</span><span>🏧</span><span>🏨</span><span>🏩</span><span>🏪</span><span>🏫</span><span>🏬</span><span>🏭</span><span>🏮</span><span>🏯</span><span>🏰</span><span>🐌</span><span>🐍</span><span>🐎</span><span>🐑</span><span>🐒</span><span>🐔</span><span>🐗</span><span>🐘</span><span>🐙</span><span>🐚</span><span>🐛</span><span>🐜</span><span>🐝</span><span>🐞</span><span>🐟</span><span>🐠</span><span>🐡</span><span>🐢</span><span>🐣</span><span>🐤</span><span>🐥</span><span>🐦</span><span>🐧</span><span>🐨</span><span>🐩</span><span>🐫</span><span>🐬</span><span>🐭</span><span>🐮</span><span>🐯</span><span>🐰</span><span>🐱</span><span>🐲</span><span>🐳</span><span>🐴</span><span>🐵</span><span>🐶</span><span>🐷</span><span>🐸</span><span>🐹</span><span>🐺</span><span>🐻</span><span>🐼</span><span>🐽</span><span>🐾</span><span>👀</span><span>👂</span><span>👃</span><span>👄</span><span>👅</span><span>👆</span><span>👇</span><span>👈</span><span>👉</span><span>👊</span><span>👋</span><span>👌</span><span>👍</span><span>👎</span><span>👏</span><span>👐</span><span>👑</span><span>👒</span><span>👓</span><span>👔</span><span>👕</span><span>👖</span><span>👗</span><span>👘</span><span>👙</span><span>👚</span><span>👛</span><span>👜</span><span>👝</span><span>👞</span><span>👟</span><span>👠</span><span>👡</span><span>👢</span><span>👣</span><span>👤</span><span>👦</span><span>👧</span><span>👨</span><span>👩</span><span>👪</span><span>👫</span><span>👮</span><span>👯</span><span>👰</span><span>👱</span><span>👲</span><span>👳</span><span>👴</span><span>👵</span><span>👶</span><span>👷</span><span>👸</span><span>👹</span><span>👺</span><span>👻</span><span>👼</span><span>👽</span><span>👾</span><span>👿</span><span>💀</span><span>💁</span><span>💂</span><span>💃</span><span>💄</span><span>💅</span><span>💆</span><span>💇</span><span>💈</span><span>💉</span><span>💊</span><span>💋</span><span>💌</span><span>💍</span><span>💎</span><span>💏</span><span>💐</span><span>💑</span><span>💒</span><span>💓</span><span>💔</span><span>💕</span><span>💖</span><span>💗</span><span>💘</span><span>💙</span><span>💚</span><span>💛</span><span>💜</span><span>💝</span><span>💞</span><span>💟</span><span>💠</span><span>💡</span><span>💢</span><span>💣</span><span>💤</span><span>💥</span><span>💦</span><span>💧</span><span>💨</span><span>💩</span><span>💪</span><span>💫</span><span>💬</span><span>💮</span><span>💯</span><span>💰</span><span>💱</span><span>💲</span><span>💳</span><span>💴</span><span>💵</span><span>💸</span><span>💹</span><span>💺</span><span>💻</span><span>💼</span><span>💽</span><span>💾</span><span>💿</span><span>📀</span><span>📁</span><span>📂</span><span>📃</span><span>📄</span><span>📅</span><span>📆</span><span>📇</span><span>📈</span><span>📉</span><span>📊</span><span>📋</span><span>📌</span><span>📍</span><span>📎</span><span>📏</span><span>📐</span><span>📑</span><span>📒</span><span>📓</span><span>📔</span><span>📕</span><span>📖</span><span>📗</span><span>📘</span><span>📙</span><span>📚</span><span>📛</span><span>📜</span><span>📝</span><span>📞</span><span>📟</span><span>📠</span><span>📡</span><span>📢</span><span>📣</span><span>📤</span><span>📥</span><span>📦</span><span>📧</span><span>📨</span><span>📩</span><span>📪</span><span>📫</span><span>📮</span><span>📰</span><span>📱</span><span>📲</span><span>📳</span><span>📴</span><span>📶</span><span>📷</span><span>📹</span><span>📺</span><span>📻</span><span>📼</span><span>🔃</span><span>🔊</span><span>🔋</span><span>🔌</span><span>🔍</span><span>🔎</span><span>🔏</span><span>🔐</span><span>🔑</span><span>🔒</span><span>🔓</span><span>🔔</span><span>🔖</span><span>🔗</span><span>🔘</span><span>🔙</span><span>🔚</span><span>🔛</span><span>🔜</span><span>🔝</span><span>🔞</span><span>🔟</span><span>🔠</span><span>🔡</span><span>🔢</span><span>🔣</span><span>🔤</span><span>🔥</span><span>🔦</span><span>🔧</span><span>🔨</span><span>🔩</span><span>🔪</span><span>🔫</span><span>🔮</span><span>🔯</span><span>🔰</span><span>🔱</span><span>🔲</span><span>🔳</span><span>🔴</span><span>🔵</span><span>🔶</span><span>🔷</span><span>🔸</span><span>🔹</span><span>🔺</span><span>🔻</span><span>🔼</span><span>🔽</span><span>🕐</span><span>🕑</span><span>🕒</span><span>🕓</span><span>🕔</span><span>🕕</span><span>🕖</span><span>🕗</span><span>🕘</span><span>🕙</span><span>🕚</span><span>🕛</span><span>🗻</span><span>🗼</span><span>🗽</span><span>🗾</span><span>🗿</span>';
+        break;
+      case 6:
+        return '<span>😀</span><span>😇</span><span>😈</span><span>😎</span><span>😐</span><span>😑</span><span>😕</span><span>😗</span><span>😙</span><span>😛</span><span>😟</span><span>😦</span><span>😧</span><span>😬</span><span>😮</span><span>😯</span><span>😴</span><span>😶</span>';
+        break;
+      case 7:
+        return '<span>🚁</span><span>🚂</span><span>🚆</span><span>🚈</span><span>🚊</span><span>🚍</span><span>🚎</span><span>🚐</span><span>🚔</span><span>🚖</span><span>🚘</span><span>🚛</span><span>🚜</span><span>🚝</span><span>🚞</span><span>🚟</span><span>🚠</span><span>🚡</span><span>🚣</span><span>🚦</span><span>🚮</span><span>🚯</span><span>🚰</span><span>🚱</span><span>🚳</span><span>🚴</span><span>🚵</span><span>🚷</span><span>🚸</span><span>🚿</span><span>🛁</span><span>🛂</span><span>🛃</span><span>🛄</span><span>🛅</span>';
+        break;
+      case 8:
+        return ' <span>🌍</span><span>🌎</span><span>🌐</span><span>🌒</span><span>🌖</span><span>🌗</span><span>🌘</span><span>🌚</span><span>🌜</span><span>🌝</span><span>🌞</span><span>🌲</span><span>🌳</span><span>🍋</span><span>🍐</span><span>🍼</span><span>🏇</span><span>🏉</span><span>🏤</span><span>🐀</span><span>🐁</span><span>🐂</span><span>🐃</span><span>🐄</span><span>🐅</span><span>🐆</span><span>🐇</span><span>🐈</span><span>🐉</span><span>🐊</span><span>🐋</span><span>🐏</span><span>🐐</span><span>🐓</span><span>🐕</span><span>🐖</span><span>🐪</span><span>👥</span><span>👬</span><span>👭</span><span>💭</span><span>💶</span><span>💷</span><span>📬</span><span>📭</span><span>📯</span><span>📵</span><span>🔀</span><span>🔁</span><span>🔂</span><span>🔄</span><span>🔅</span><span>🔆</span><span>🔇</span><span>🔉</span><span>🔕</span><span>🔬</span><span>🔭</span><span>🕜</span><span>🕝</span><span>🕞</span><span>🕟</span>';
+        break;
+      default:
+      return 'error'
+    }
+
+  }
+
+  $('.em_group_link').click(function () {
+    $('.emoji_pop').show();
+
+  });
+
+  function emoji_after_change() {
+    $('.emoji_pop span').click(function () {
+      let c = $("#command_resp").val();
+      let cursor = $("#command_resp").getCursorPosition();
+      let newc = c.substr(0,cursor) + $(this).html() + c.substr(cursor);
+      $("#command_resp").val(newc);
+      $("#command_resp").setCursorPosition(cursor);
+      $('.emoji_pop').hide();
+    })
+  }
+
+
+  $('#em_group_link1').click(function () {
+    $('.emoji_pop').html( open_em_group(1) );
+    emoji_after_change();
+  });
+  $('#em_group_link2').click(function () {
+    $('.emoji_pop').html( open_em_group(2) );
+    emoji_after_change();
+  });
+  $('#em_group_link3').click(function () {
+    $('.emoji_pop').html( open_em_group(3) );
+    emoji_after_change();
+  });
+  $('#em_group_link4').click(function () {
+    $('.emoji_pop').html( open_em_group(4) );
+    emoji_after_change();
+  });
+  $('#em_group_link5').click(function () {
+    $('.emoji_pop').html( open_em_group(5) );
+    emoji_after_change();
+  });
+  $('#em_group_link6').click(function () {
+    $('.emoji_pop').html( open_em_group(6) );
+    emoji_after_change();
+  });
+  $('#em_group_link7').click(function () {
+    $('.emoji_pop').html( open_em_group(7) );
+    emoji_after_change();
+  });
+  $('#em_group_link8').click(function () {
+    $('.emoji_pop').html( open_em_group(8) );
+    emoji_after_change();
+  });
+
+  // JQ *****************
+  (function ($, undefined) {
+      $.fn.getCursorPosition = function() {
+          let el = $(this).get(0);
+          let pos = 0;
+          if('selectionStart' in el) {
+              pos = el.selectionStart;
+          } else if('selection' in document) {
+              el.focus();
+              let Sel = document.selection.createRange();
+              let SelLength = document.selection.createRange().text.length;
+              Sel.moveStart('character', -el.value.length);
+              pos = Sel.text.length - SelLength;
+          }
+          return pos;
+      }
+  })(jQuery);
+  $.fn.setCursorPosition = function(pos) {
+    this.each(function(index, elem) {
+      if (elem.setSelectionRange) {
+        elem.setSelectionRange(pos, pos);
+      } else if (elem.createTextRange) {
+        let range = elem.createTextRange();
+        range.collapse(true);
+        range.moveEnd('character', pos);
+        range.moveStart('character', pos);
+        range.select();
+      }
+    });
+    return this;
+  };
+
+</script>
